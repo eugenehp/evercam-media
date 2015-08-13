@@ -1,6 +1,8 @@
 defmodule EvercamMedia.Endpoint do
   use Phoenix.Endpoint, otp_app: :evercam_media
 
+  socket "/ws", EvercamMedia.UserSocket
+
   # Serve at "/" the given assets from "priv/static" directory
   plug Plug.Static,
     at: "/", from: :evercam_media, gzip: false,
@@ -11,6 +13,7 @@ defmodule EvercamMedia.Endpoint do
   # Code reloading will only work if the :code_reloader key of
   # the :phoenix application is set to true in your config file.
   if code_reloading? do
+    socket "/phoenix/live_reload/socket", Phoenix.LiveReloader.Socket
     plug Phoenix.LiveReloader
     plug Phoenix.CodeReloader
   end
@@ -26,8 +29,7 @@ defmodule EvercamMedia.Endpoint do
   plug Plug.Session,
     store: :cookie,
     key: "_media_key",
-    signing_salt: "sZRQyVW1",
-    encryption_salt: "awIwE/dg"
+    signing_salt: "sZRQyVW1"
 
-  plug :router, EvercamMedia.Router
+  plug EvercamMedia.Router  
 end

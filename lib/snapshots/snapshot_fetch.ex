@@ -100,7 +100,7 @@ defmodule EvercamMedia.Snapshot do
 
   def save_snapshot_record(camera_id, notes, snap_timestamp, file_timestamp, true, file_path, _) do
     camera = Repo.one! Camera.by_exid(camera_id)
-    Repo.insert %Snapshot{camera_id: camera.id, data: "S3", notes: notes, created_at: snap_timestamp}
+    Repo.insert! %Snapshot{camera_id: camera.id, data: "S3", notes: notes, created_at: snap_timestamp}
     update_thumbnail_url(camera_id, file_path)
   end
 
@@ -113,14 +113,14 @@ defmodule EvercamMedia.Snapshot do
   def update_thumbnail_url(camera_id, file_path) do
     camera = Repo.one! Camera.by_exid(camera_id)
     camera = %{camera | thumbnail_url: S3.file_url(file_path)}
-    Repo.update camera
+    Repo.update! camera
   end
 
   def update_camera_status(camera_id, timestamp, status) do
     camera = Repo.one! Camera.by_exid(camera_id)
     camera_is_online = camera.is_online
     camera = construct_camera(camera, timestamp, status, camera_is_online == status)
-    Repo.update camera
+    Repo.update! camera
 
     unless camera_is_online == status do
       try do
@@ -151,11 +151,11 @@ defmodule EvercamMedia.Snapshot do
   end
 
   def log_camera_status(camera_id, true, timestamp) do
-    Repo.insert %CameraActivity{camera_id: camera_id, action: "online", done_at: timestamp}
+    Repo.insert! %CameraActivity{camera_id: camera_id, action: "online", done_at: timestamp}
   end
 
   def log_camera_status(camera_id, false, timestamp) do
-    Repo.insert %CameraActivity{camera_id: camera_id, action: "offline", done_at: timestamp}
+    Repo.insert! %CameraActivity{camera_id: camera_id, action: "offline", done_at: timestamp}
   end
 
   defp construct_camera(camera, timestamp, _, true) do

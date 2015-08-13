@@ -1,4 +1,5 @@
-import {Socket} from "phoenix"
+import {Socket} from "deps/phoenix/web/static/js/phoenix"
+import "deps/phoenix_html/web/static/js/phoenix_html"
 
 $(() => {
   let camera_id = window.Evercam.Camera.id;
@@ -7,7 +8,7 @@ $(() => {
 
   socket.connect();
 
-  let chan = socket.chan(`cameras:${camera_id}`, {})
+  let chan = socket.channel(`cameras:${camera_id}`, {})
 
   chan.join()
 

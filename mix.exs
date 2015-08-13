@@ -38,12 +38,12 @@ defmodule EvercamMedia.Mixfile do
   ]
 
   defp deps do
-    [{:phoenix, "~> 0.14"},
-     {:phoenix_ecto, "~> 0.4"},
-     {:phoenix_html, "~> 1.1"},
-     {:phoenix_live_reload, "~> 0.4", only: :dev},
+    [{:phoenix, "~> 0.16"},
+     {:phoenix_ecto, "~> 0.9"},
+     {:phoenix_html, "~> 2.0"},
+     {:phoenix_live_reload, "~> 0.5", only: :dev},
      {:postgrex, ">= 0.0.0"},
-     {:ecto, "~> 0.11.2"},
+     {:ecto, "~> 0.14"},
      {:cowboy, "~> 1.0"},
      {:con_cache, "~> 0.6.0"},
      {:httpotion, github: "myfreeweb/httpotion"},
