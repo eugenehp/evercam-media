@@ -3,7 +3,7 @@ defmodule EvercamMedia.Endpoint do
 
   # Serve at "/" the given assets from "priv/static" directory
   plug Plug.Static,
-    at: "/", from: :evercam_media,
+    at: "/", from: :evercam_media, gzip: false,
     only: ~w(css images js favicon.ico robots.txt)
 
   plug Plug.Logger
