@@ -6,6 +6,7 @@ defmodule Snapshot do
 
     field :data, :string
     field :notes, :string
+    field :motiondetection, :integer
     field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
   end
 

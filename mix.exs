@@ -8,8 +8,12 @@ defmodule EvercamMedia.Mixfile do
      elixirc_paths: ["lib", "web"],
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     compilers: [:phoenix] ++ Mix.compilers,
+     compilers: [:make, :phoenix] ++ Mix.compilers,
      deps: deps]
+  end
+
+  defp aliases do
+    [clean: ["clean", "clean.make"]]
   end
 
   def application do
@@ -34,7 +38,6 @@ defmodule EvercamMedia.Mixfile do
     :porcelain,
     :postgrex,
     :timex,
-    :calendar,
     :uuid
   ]
 
@@ -50,7 +53,6 @@ defmodule EvercamMedia.Mixfile do
      {:httpotion, github: "myfreeweb/httpotion"},
      {:ibrowse, github: "cmullaparthi/ibrowse", tag: "v4.1.1", override: true},
      {:dotenv, "~> 0.0.4"},
-     {:calendar, "~> 0.8.0"},
      {:timex, "~> 0.13.3"},
      {:porcelain, "~> 2.0"},
      {:mini_s3, github: "ericmj/mini_s3", branch: "hex-fixes"},
@@ -59,5 +61,31 @@ defmodule EvercamMedia.Mixfile do
      {:eredis, github: 'wooga/eredis', tag: 'v1.0.5', override: true},
      {:uuid, github: 'zyro/elixir-uuid', override: true},
      {:exrm, "~> 0.14.16"}]
+  end
+end
+
+###################
+# Make file Tasks #
+###################
+ 
+defmodule Mix.Tasks.Compile.Make do
+  @shortdoc "Compiles helper in c_src"
+ 
+  def run(_) do
+    {result, _error_code} = System.cmd("make", [], stderr_to_stdout: true)
+    Mix.shell.info result
+ 
+    :ok
+  end
+end
+ 
+defmodule Mix.Tasks.Clean.Make do
+  @shortdoc "Cleans helper in c_src"
+ 
+  def run(_) do
+    {result, _error_code} = System.cmd("make", ['clean'], stderr_to_stdout: true)
+    Mix.shell.info result
+ 
+    :ok
   end
 end
