@@ -2,6 +2,10 @@ defmodule EvercamMedia.Snapshot do
   alias EvercamMedia.Repo
   alias EvercamMedia.S3
   alias EvercamMedia.HTTPClient
+<<<<<<< HEAD
+=======
+  alias EvercamMedia.Motiondetection
+>>>>>>> eugenehp-motion-detection-first
   require Logger
 
   def fetch(url, ":") do
@@ -64,11 +68,44 @@ defmodule EvercamMedia.Snapshot do
       file_timestamp = Timex.Date.convert Timex.Date.now, :secs
       file_path = "/#{camera_id}/snapshots/#{file_timestamp}.jpg"
 
+      directory_path  = "/tmp/#{camera_id}"
+      last_file_path  = "#{directory_path}/last.jpg"
+      tmp_path        = "#{directory_path}/#{file_timestamp}.jpg"
+
+      if File.exists? directory_path  do
+        Logger.info "Already created #{directory_path}"
+      else
+        File.mkdir! directory_path
+      end
+      
+      File.write! tmp_path, image
+      Logger.info "File written to #{tmp_path} "
+
+      if File.exists? last_file_path do
+        motiondetection_rate = motion_detection(tmp_path, last_file_path)
+      else
+        motiondetection_rate = 0
+      end
+
       update_camera_status(camera_id, snap_timestamp, true)
-      S3.upload(camera_id, image, file_path, file_timestamp)
-      save_snapshot_record(camera_id, notes, snap_timestamp, file_timestamp, S3.exists?(file_path), file_path)
+
+      if System.get_env("EVERCAM_LOCAL") do
+        save_snapshot_record(camera_id, notes, snap_timestamp, file_timestamp, File.exists?(tmp_path), file_path, "local", motiondetection_rate)
+      else
+        if File.exists? tmp_path do
+          File.rm! tmp_path
+        end
+        S3.upload(camera_id, image, file_path, file_timestamp)
+        save_snapshot_record(camera_id, notes, snap_timestamp, file_timestamp, S3.exists?(file_path), file_path, "S3", motiondetection_rate)
+      end
+
+      if File.exists? last_file_path do
+        File.rm! last_file_path
+      end
+      File.write! last_file_path, image
+
       ConCache.put(:cache, camera_id, %{image: image, timestamp: file_timestamp, notes: notes})
-      Logger.info "Uploaded snapshot '#{file_timestamp}' for camera '#{camera_id}'"
+      Logger.info "Uploaded snapshot '#{file_timestamp}' for camera '#{camera_id}' into '#{tmp_path}'"
       %{camera_id: camera_id, image: image, timestamp: file_timestamp, notes: notes}
     rescue
       error in [Postgrex.Error] ->
@@ -83,6 +120,28 @@ defmodule EvercamMedia.Snapshot do
     end
   end
 
+  def motion_detection(current_image, previous_image) do
+    {:ok,image1} =  File.read previous_image
+    {:ok,image2} =  File.read current_image
+
+    {:ok,{width1,height1,bytes1}} = Motiondetection.load(image1)
+    {:ok,{_width2,_height2,bytes2}} = Motiondetection.load(image2)
+
+    # use this to parallel the process, and play with the quality and performance
+    position  = width1*height1*3 # end position for a process
+    minPosition = 0 # start position for a process in a binary list of pixesl {R,G,B}
+    step    = 2 # check each 2nd pixel
+    min     = 30 # change between previous and current image should be at least
+ 
+    md = Motiondetection.compare(bytes1, bytes2, position, minPosition, step, min)
+    float = Elixir.Float.ceil(100 * md)
+    string = Elixir.Float.to_string float
+    {result,_} = Elixir.Integer.parse string
+
+    IO.puts "Comparison result of motion_detection is #{result}"
+    result
+  end
+
   def check_jpg(response) do
     if String.valid?(response) do
       raise SnapshotError
@@ -94,25 +153,31 @@ defmodule EvercamMedia.Snapshot do
     Logger.error Exception.format_stacktrace System.stacktrace
   end
 
-  def save_snapshot_record(camera_id, _, _, file_timestamp, _, _, count) when count >= 10 do
+  def save_snapshot_record(camera_id, _, _, file_timestamp, _, _, _, _, count) when count >= 10 do
     Logger.error "Snapshot '#{file_timestamp}' for '#{camera_id}' not found on S3, aborting."
   end
 
-  def save_snapshot_record(camera_id, notes, snap_timestamp, file_timestamp, true, file_path, _) do
+  def save_snapshot_record(camera_id, notes, snap_timestamp, file_timestamp, true, file_path, type, motiondetection_rate, _) do
     camera = Repo.one! Camera.by_exid(camera_id)
-    Repo.insert %Snapshot{camera_id: camera.id, data: "S3", notes: notes, created_at: snap_timestamp}
-    update_thumbnail_url(camera_id, file_path)
+    Repo.insert %Snapshot{camera_id: camera.id, data: type, notes: notes, created_at: snap_timestamp, motiondetection: motiondetection_rate}
+    update_thumbnail_url(camera_id, file_path, type)
   end
 
-  def save_snapshot_record(camera_id, notes, snap_timestamp, file_timestamp, false, file_path, count \\ 0) when count < 10 do
-    Logger.warn "Snapshot '#{file_timestamp}' for '#{camera_id}' not found on S3, try ##{count}"
+  def save_snapshot_record(camera_id, notes, snap_timestamp, file_timestamp, false, file_path, type, motiondetection_rate, count \\ 0) when count < 10 do
+    Logger.warn "Snapshot '#{file_timestamp}' for '#{camera_id}' not found on #{type}, try ##{count}"
     :timer.sleep 1000
-    save_snapshot_record(camera_id, notes, snap_timestamp, file_timestamp, S3.exists?(file_path), file_path, count + 1)
+    save_snapshot_record(camera_id, notes, snap_timestamp, file_timestamp, S3.exists?(file_path), file_path, type, motiondetection_rate, count + 1)
   end
 
-  def update_thumbnail_url(camera_id, file_path) do
+  def update_thumbnail_url(camera_id, file_path, type) do
     camera = Repo.one! Camera.by_exid(camera_id)
-    camera = %{camera | thumbnail_url: S3.file_url(file_path)}
+
+    if type == "S3" do
+      camera = %{camera | thumbnail_url: S3.file_url(file_path)}
+    else
+      # http://localhost:4000/v1/cameras/phony_camera/snapshots/something_else.jpg returns /tmp/phony_camera/something_else.jpg
+      camera = %{camera | thumbnail_url: "http://localhost:4000/v1/cameras#{file_path}"}
+    end
     Repo.update camera
   end
 

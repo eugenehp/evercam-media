@@ -14,6 +14,19 @@ defmodule EvercamMedia.SnapshotController do
     show_respond(conn, code, response, params["id"])
   end
 
+  def show_local_file(conn, params) do
+    camera_id = params["id"]
+    filename = params["filename"]
+    path = "/tmp/#{camera_id}/#{filename}"
+    Logger.info "show_local_file_respond path=`#{path}`"
+    image = File.read! path
+    conn
+    |> put_status(200)
+    |> put_resp_header("content-type", "image/jpg")
+    |> put_resp_header("access-control-allow-origin", "*")
+    |> text image
+  end
+
   def create(conn, params) do
     [code, response] = [200, ConCache.get(:cache, params["id"])]
     unless response do
