@@ -2,10 +2,8 @@ defmodule EvercamMedia.Snapshot do
   alias EvercamMedia.Repo
   alias EvercamMedia.S3
   alias EvercamMedia.HTTPClient
-<<<<<<< HEAD
-=======
   alias EvercamMedia.Motiondetection
->>>>>>> eugenehp-motion-detection-first
+  
   require Logger
 
   def fetch(url, ":") do
