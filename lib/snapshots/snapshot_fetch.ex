@@ -3,7 +3,7 @@ defmodule EvercamMedia.Snapshot do
   alias EvercamMedia.S3
   alias EvercamMedia.HTTPClient
   alias EvercamMedia.Motiondetection
-  
+
   require Logger
 
   def fetch(url, ":") do
@@ -75,7 +75,7 @@ defmodule EvercamMedia.Snapshot do
       else
         File.mkdir! directory_path
       end
-      
+
       File.write! tmp_path, image
       Logger.info "File written to #{tmp_path} "
 
@@ -130,7 +130,7 @@ defmodule EvercamMedia.Snapshot do
     minPosition = 0 # start position for a process in a binary list of pixesl {R,G,B}
     step    = 2 # check each 2nd pixel
     min     = 30 # change between previous and current image should be at least
- 
+
     md = Motiondetection.compare(bytes1, bytes2, position, minPosition, step, min)
     float = Elixir.Float.ceil(100 * md)
     string = Elixir.Float.to_string float
