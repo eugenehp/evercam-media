@@ -9,6 +9,7 @@ defmodule EvercamMedia.Mixfile do
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      compilers: [:make, :phoenix] ++ Mix.compilers,
+     aliases: aliases,
      deps: deps]
   end
 
