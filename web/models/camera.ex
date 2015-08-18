@@ -79,7 +79,17 @@ defmodule Camera do
   end
 
   def recording?(camera) do
-    recording_cameras = [
+    camera = EvercamMedia.Repo.preload camera, :cloud_recordings
+    cloud_recording = List.first(camera.cloud_recordings)
+    if cloud_recording == nil do
+      false
+    else
+      cloud_recording.frequency == 60
+    end
+  end
+
+  def motion_detection_enabled?(camera_id) do
+    cameras = [
       "bankers",
       "beefcammobile",
       "bennett",
@@ -119,12 +129,6 @@ defmodule Camera do
       "zipyard-ranelagh-foh"
     ]
 
-    camera = EvercamMedia.Repo.preload camera, :cloud_recordings
-    cloud_recording = List.first(camera.cloud_recordings)
-    if cloud_recording == nil do
-      false
-    else
-      cloud_recording.frequency == 60
-    end
+    Enum.any?(cameras, &(camera_id == &1))
   end
 end
