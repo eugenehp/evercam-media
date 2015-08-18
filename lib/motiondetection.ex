@@ -3,7 +3,7 @@ defmodule EvercamMedia.Motiondetection do
 
   def init() do
     :erlang.load_nif("./priv_dir/lib_elixir_motiondetection", 0)
-    # :ok
+    :ok
   end
 
   def test(images_path) do
