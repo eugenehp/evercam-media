@@ -19,6 +19,7 @@ ifneq ($(OS),Windows_NT)
 endif
 
 priv_dir/lib_elixir_motiondetection.so: clean
+	mkdir priv_dir -p
 	$(CC) $(CFLAGS) -shared $(LDFLAGS) -o $@ c_src/lib_elixir_motiondetection.c -ljpeg
 
 clean:
