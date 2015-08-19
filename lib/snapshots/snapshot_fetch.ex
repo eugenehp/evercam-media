@@ -79,7 +79,7 @@ defmodule EvercamMedia.Snapshot do
       File.write! tmp_path, image
       Logger.info "File written to #{tmp_path} "
 
-      if File.exists?(last_file_path) && Camera.motion_detection_enabled?(camera_id) do
+      if File.exists? last_file_path do
         motiondetection_rate = motion_detection(tmp_path, last_file_path)
       else
         motiondetection_rate = 0
