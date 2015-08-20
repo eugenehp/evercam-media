@@ -77,10 +77,10 @@ defmodule EvercamMedia.Snapshot do
       end
 
       File.write! tmp_path, image
-      Logger.info "File written to #{tmp_path} "
+      Logger.info "File written to #{tmp_path} for camera #{camera_id}"
 
       if File.exists? last_file_path do
-        motiondetection_rate = motion_detection(tmp_path, last_file_path)
+        motiondetection_rate = motion_detection(camera_id, tmp_path, last_file_path)
       else
         motiondetection_rate = 0
       end
@@ -118,7 +118,7 @@ defmodule EvercamMedia.Snapshot do
     end
   end
 
-  def motion_detection(current_image, previous_image) do
+  def motion_detection(camera_id, current_image, previous_image) do
     {:ok,image1} =  File.read previous_image
     {:ok,image2} =  File.read current_image
 
@@ -136,7 +136,7 @@ defmodule EvercamMedia.Snapshot do
     string = Elixir.Float.to_string float
     {result,_} = Elixir.Integer.parse string
 
-    IO.puts "Comparison result of motion_detection is #{result}"
+    IO.puts "Comparison result of motion_detection is #{result} for camera #{camera_id}"
     result
   end
 
