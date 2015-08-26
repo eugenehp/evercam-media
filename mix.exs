@@ -60,6 +60,6 @@ defmodule EvercamMedia.Mixfile do
      {:exq, github: "akira/exq"},
      {:eredis, github: 'wooga/eredis', tag: 'v1.0.5', override: true},
      {:uuid, github: 'zyro/elixir-uuid', override: true},
-     {:exrm, "~> 0.14.16"}]
+     {:exrm, "~> 0.18.1"}]
   end
 end
