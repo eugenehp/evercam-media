@@ -30,6 +30,11 @@ defmodule EvercamMedia.Router do
   scope "/v1", EvercamMedia do
     pipe_through :api
 
+    post "/registrations", RegistrationController, :create
+    put "/registrations", RegistrationController, :update
+    post "/sessions", SessionController, :create
+    delete "/sessions", SessionController, :delete
+
     get "/cameras/:id/ptz/status", ONVIFPTZController, :status
     get "/cameras/:id/ptz/presets", ONVIFPTZController, :presets
     get "/cameras/:id/ptz/nodes", ONVIFPTZController, :nodes
