@@ -1,7 +1,7 @@
-defmodule EvercamMedia.RegistrationControllerTest do
+defmodule EvercamMedia.UserControllerTest do
   use EvercamMedia.ConnCase
 
-  test "POST /v1/registrations" do
+  test "POST /v1/users" do
     {:ok, country } = EvercamMedia.Repo.insert(%Country{ name: "Whatever", iso3166_a2: "WHTEVR" })
     params = %{ "user" => %{ firstname: "John" , lastname: "Doe", 
         email: "johndoe@example.com", username: "johnd", country_id: country.id, password: "some_password" } }

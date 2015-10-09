@@ -30,8 +30,8 @@ defmodule EvercamMedia.Router do
   scope "/v1", EvercamMedia do
     pipe_through :api
 
-    post "/registrations", RegistrationController, :create
-    put "/registrations", RegistrationController, :update
+    post "/users", UserController, :create
+    put "/users", UserController, :update
     post "/sessions", SessionController, :create
     delete "/sessions", SessionController, :delete
 

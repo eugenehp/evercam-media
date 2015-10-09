@@ -1,4 +1,4 @@
-defmodule EvercamMedia.RegistrationController do
+defmodule EvercamMedia.UserController do
   use EvercamMedia.Web, :controller
 
   def create(conn, %{ "user" => user_params }) do
