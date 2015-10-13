@@ -23,7 +23,8 @@ defmodule User do
   def changeset(model, params \\ :empty) do
     model
     |> cast(params, @required_fields, @optional_fields)
-    |> unique_constraint(:email)
+    |> unique_constraint(:email, [name: "ux_users_email"])
+    |> unique_constraint(:username, [name: "ux_users_username"])
     |> validate_format(:email, ~r/^.+@.+\..+$/)
   end
 
