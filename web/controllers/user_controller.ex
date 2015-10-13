@@ -11,32 +11,33 @@ defmodule EvercamMedia.UserController do
           {:ok, expiry_date } = Calendar.DateTime.to_erl(exp_date) |> Ecto.DateTime.cast
           token = Ecto.Model.build(user, :access_tokens, is_revoked: false, request: UUID.uuid4(:hex), expires_at: expiry_date )
 
-          case Repo.insert(token) do
-            {:ok, token } ->
-              conn
-              |> put_status(:created)
-              |> put_resp_header("access-control-allow-origin", "*")
-              |> render("user.json", %{ user: user, token: token })
-            {:error, changeset} ->
-              conn
-              |> put_status(:unprocessable_entity)
-              |> put_resp_header("access-control-allow-origin", "*")
-              |> render(EvercamMedia.ChangesetView, "error.json", changeset: changeset)
-          end
+          Repo.insert(token) |> handle_token_insert(user, conn)
         { :error, changeset } ->
-          conn
-          |> put_status(:conflict)
-          |> put_resp_header("access-control-allow-origin", "*")
-          |> render(EvercamMedia.ChangesetView, "error.json", changeset: changeset)
+          conn |> handle_error(:conflict, changeset)
       end
     else
-      conn
-      |> put_status(:bad_request)
-      |> put_resp_header("access-control-allow-origin", "*")
-      |> render(EvercamMedia.ChangesetView, "error.json", changeset: user_changeset)
+      conn |> handle_error(:bad_request, user_changeset)
     end
   end
 
-  def update(conn, %{ "token" => token, "user" => user_params }) do
+  def update(conn, %{ "user" => user_params }) do
+  end
+
+  defp handle_token_insert({:ok, token}, user, conn) do
+    conn
+    |> put_status(:created)
+    |> put_resp_header("access-control-allow-origin", "*")
+    |> render("user.json", %{ user: user, token: token })
+  end
+
+  defp handle_token_insert({:error, changeset}, changeset, conn) do
+    conn |> handle_error(:unprocessable_entity, changeset)
+  end
+
+  defp handle_error(conn, status, changeset) do
+    conn
+    |> put_status(status)
+    |> put_resp_header("access-control-allow-origin", "*")
+    |> render(EvercamMedia.ChangesetView, "error.json", changeset: changeset)
   end
 end
