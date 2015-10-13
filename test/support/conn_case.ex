@@ -35,7 +35,7 @@ defmodule EvercamMedia.ConnCase do
     end
   end
 
-  setup_all do
+  setup do
     # Wrap this case in a transaction
     Ecto.Adapters.SQL.begin_test_transaction(EvercamMedia.Repo)
 
